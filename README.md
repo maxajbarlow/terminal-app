@@ -4,7 +4,7 @@ A modern terminal emulator for macOS with GPU acceleration, SSH/Mosh support, an
 
 ## Features
 
-- **GPU Accelerated Rendering** - Smooth 60fps scrolling with Metal
+- **GPU Accelerated Rendering** - Smooth scrolling with Metal
 - **SSH & Mosh Support** - Built-in clients with automatic key management
 - **Advanced Shell** - Environment variables, redirection, tab completion
 - **Customizable Interface** - Themes, fonts, and layout options
