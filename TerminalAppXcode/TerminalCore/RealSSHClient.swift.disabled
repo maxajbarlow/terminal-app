@@ -1,0 +1,240 @@
+import Foundation
+import NIOCore
+import NIOPosix
+import NIOSSH
+import Crypto
+
+public enum RealSSHError: Error {
+    case connectionFailed(String)
+    case authenticationFailed
+    case protocolError(String)
+    case channelError(String)
+    case networkError(String)
+}
+
+// Authentication delegate supporting both password and public key authentication
+private class SSHAuthenticationDelegate: NIOSSHClientUserAuthenticationDelegate {
+    private let username: String
+    private let password: String?
+    private let privateKey: NIOSSHPrivateKey?
+    private var triedMethods: Set<String> = []
+    
+    init(username: String, password: String? = nil, privateKey: NIOSSHPrivateKey? = nil) {
+        self.username = username
+        self.password = password
+        self.privateKey = privateKey
+    }
+    
+    func nextAuthenticationType(
+        availableMethods: NIOSSHAvailableUserAuthenticationMethods,
+        nextChallengePromise: EventLoopPromise<NIOSSHUserAuthenticationOffer?>
+    ) {
+        // Try public key authentication first if available and not yet tried
+        if availableMethods.contains(.publicKey), 
+           let privateKey = privateKey,
+           !triedMethods.contains("publicKey") {
+            triedMethods.insert("publicKey")
+            nextChallengePromise.succeed(.init(
+                username: username, 
+                serviceName: "", 
+                offer: .privateKey(.init(privateKey: privateKey))
+            ))
+            return
+        }
+        
+        // Try password authentication if available and not yet tried
+        if availableMethods.contains(.password), 
+           let password = password,
+           !triedMethods.contains("password") {
+            triedMethods.insert("password")
+            nextChallengePromise.succeed(.init(
+                username: username, 
+                serviceName: "", 
+                offer: .password(.init(password: password))
+            ))
+            return
+        }
+        
+        // No suitable authentication method available
+        nextChallengePromise.succeed(nil)
+    }
+}
+
+// Host key verification delegate (WARNING: This accepts all host keys - not secure for production)
+private class AcceptAllHostKeysDelegate: NIOSSHClientServerAuthenticationDelegate {
+    func validateHostKey(
+        hostKey: NIOSSHPublicKey,
+        validationCompletePromise: EventLoopPromise<Void>
+    ) {
+        // WARNING: This accepts all host keys without verification
+        // In production, you should verify the host key against known_hosts
+        validationCompletePromise.succeed(())
+    }
+}
+
+// Handler for SSH session data
+private class SSHSessionHandler: ChannelInboundHandler {
+    typealias InboundIn = SSHChannelData
+    typealias OutboundOut = SSHChannelData
+    
+    let onDataReceived: (Data) -> Void
+    
+    init(onDataReceived: @escaping (Data) -> Void) {
+        self.onDataReceived = onDataReceived
+    }
+    
+    func channelRead(context: ChannelHandlerContext, data: NIOAny) {
+        let channelData = unwrapInboundIn(data)
+        
+        switch channelData.type {
+        case .channel:
+            if case .byteBuffer(let buffer) = channelData.data {
+                let data = Data(buffer: buffer)
+                onDataReceived(data)
+            }
+        default:
+            break
+        }
+    }
+}
+
+// Real SSH client implementation using SwiftNIO SSH
+public class RealSSHClient {
+    private let host: String
+    private let port: Int
+    private let username: String
+    private let eventLoopGroup: MultiThreadedEventLoopGroup
+    private var channel: Channel?
+    private var childChannel: Channel?
+    private var isConnected = false
+    
+    public var onDataReceived: ((Data) -> Void)?
+    
+    public init(host: String, port: Int, username: String) {
+        self.host = host
+        self.port = port
+        self.username = username
+        self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+    }
+    
+    deinit {
+        disconnect()
+        try? eventLoopGroup.syncShutdownGracefully()
+    }
+    
+    public func connect(password: String?, privateKey: NIOSSHPrivateKey? = nil) async throws {
+        let username = self.username // Capture for use in closure
+        
+        let bootstrap = ClientBootstrap(group: eventLoopGroup)
+            .channelInitializer { channel in
+                let userAuthDelegate = SSHAuthenticationDelegate(username: username, password: password, privateKey: privateKey)
+                let serverAuthDelegate = AcceptAllHostKeysDelegate()
+                
+                let sshHandler = NIOSSHHandler(
+                    role: .client(
+                        .init(
+                            userAuthDelegate: userAuthDelegate,
+                            serverAuthDelegate: serverAuthDelegate
+                        )
+                    ),
+                    allocator: channel.allocator,
+                    inboundChildChannelInitializer: nil
+                )
+                
+                return channel.pipeline.addHandler(sshHandler)
+            }
+        
+        do {
+            // Connect to SSH server
+            channel = try await bootstrap.connect(host: host, port: port).get()
+            
+            // Create SSH session channel for shell access
+            let promise = channel!.eventLoop.makePromise(of: Channel.self)
+            
+            let sessionHandler = SSHSessionHandler(onDataReceived: { data in
+                DispatchQueue.main.async {
+                    self.onDataReceived?(data)
+                }
+            })
+            
+            _ = try await channel!.pipeline.handler(type: NIOSSHHandler.self).flatMap { sshHandler in
+                sshHandler.createChannel(promise, channelType: .session) { childChannel, channelType in
+                    guard channelType == .session else {
+                        return childChannel.eventLoop.makeFailedFuture(RealSSHError.channelError("Wrong channel type"))
+                    }
+                    
+                    return childChannel.setOption(ChannelOptions.allowRemoteHalfClosure, value: true).flatMap {
+                        return childChannel.pipeline.addHandler(sessionHandler)
+                    }
+                }
+                
+                return promise.futureResult
+            }.get()
+            
+            childChannel = try await promise.futureResult.get()
+            
+            // Request PTY and shell
+            try await requestPTYAndShell()
+            
+            isConnected = true
+            
+        } catch {
+            throw RealSSHError.connectionFailed(error.localizedDescription)
+        }
+    }
+    
+    private func requestPTYAndShell() async throws {
+        guard let childChannel = childChannel else {
+            throw RealSSHError.channelError("No child channel available")
+        }
+        
+        // Request PTY
+        let ptyRequest = SSHChannelRequestEvent.PseudoTerminalRequest(
+            wantReply: true,
+            term: "xterm-256color",
+            terminalCharacterWidth: 80,
+            terminalRowHeight: 24,
+            terminalPixelWidth: 0,
+            terminalPixelHeight: 0,
+            terminalModes: SSHTerminalModes([:])
+        )
+        
+        try await childChannel.triggerUserOutboundEvent(ptyRequest).get()
+        
+        // Request shell
+        let shellRequest = SSHChannelRequestEvent.ShellRequest(wantReply: true)
+        
+        try await childChannel.triggerUserOutboundEvent(shellRequest).get()
+    }
+    
+    public func disconnect() {
+        isConnected = false
+        childChannel?.close(promise: nil)
+        channel?.close(promise: nil)
+        childChannel = nil
+        channel = nil
+    }
+    
+    public func sendData(_ data: String) {
+        guard let childChannel = childChannel, isConnected else { return }
+        
+        let buffer = ByteBuffer(string: data)
+        let channelData = SSHChannelData(
+            type: .channel,
+            data: .byteBuffer(buffer)
+        )
+        
+        childChannel.writeAndFlush(channelData, promise: nil)
+    }
+    
+    public var connected: Bool {
+        return isConnected
+    }
+}
+
+// Helper extension to create Data from ByteBuffer
+private extension Data {
+    init(buffer: ByteBuffer) {
+        self = buffer.getData(at: buffer.readerIndex, length: buffer.readableBytes) ?? Data()
+    }
+}

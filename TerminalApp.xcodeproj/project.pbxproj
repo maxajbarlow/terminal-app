@@ -1,0 +1,396 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1A000000000000000000000000000001 /* TerminalApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000001 /* TerminalApp.swift */; };
+		1A000000000000000000000000000002 /* ANSIParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000002 /* ANSIParser.swift */; };
+		1A000000000000000000000000000003 /* ConfigurationWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000003 /* ConfigurationWindow.swift */; };
+		1A000000000000000000000000000004 /* InlineTerminalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000004 /* InlineTerminalView.swift */; };
+		1A000000000000000000000000000005 /* KeyboardHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000005 /* KeyboardHandler.swift */; };
+		1A000000000000000000000000000006 /* LocalShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000006 /* LocalShell.swift */; };
+		1A000000000000000000000000000007 /* MacOSTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000007 /* MacOSTextField.swift */; };
+		1A000000000000000000000000000008 /* MoshClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000008 /* MoshClient.swift */; };
+		1A000000000000000000000000000009 /* NativeTerminalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000009 /* NativeTerminalView.swift */; };
+		1A000000000000000000000000000010 /* SimpleShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000010 /* SimpleShell.swift */; };
+		1A000000000000000000000000000011 /* SplitPaneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000011 /* SplitPaneView.swift */; };
+		1A000000000000000000000000000012 /* SSHClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000012 /* SSHClient.swift */; };
+		1A000000000000000000000000000013 /* TabbedTerminalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000013 /* TabbedTerminalView.swift */; };
+		1A000000000000000000000000000014 /* TabManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000014 /* TabManager.swift */; };
+		1A000000000000000000000000000015 /* TerminalInputHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000015 /* TerminalInputHandler.swift */; };
+		1A000000000000000000000000000016 /* TerminalSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000016 /* TerminalSearchView.swift */; };
+		1A000000000000000000000000000017 /* TerminalSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000017 /* TerminalSession.swift */; };
+		1A000000000000000000000000000018 /* TerminalTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000018 /* TerminalTheme.swift */; };
+		1A000000000000000000000000000019 /* TerminalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000019 /* TerminalView.swift */; };
+		1A000000000000000000000000000020 /* TerminalWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000020 /* TerminalWindow.swift */; };
+		1A000000000000000000000000000021 /* ThemeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000021 /* ThemeSettingsView.swift */; };
+		1A000000000000000000000000000022 /* VTermWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000022 /* VTermWrapper.swift */; };
+		1A000000000000000000000000000024 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000024 /* AppState.swift */; };
+		563F7FE22E639B45004CDCAD /* SwiftSSHClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 563F7FE12E639B44004CDCAD /* SwiftSSHClient.swift */; };
+		563F7FE42E647284004CDCAD /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 563F7FE32E647284004CDCAD /* SettingsManager.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1A000000000000000000000000000000 /* TerminalApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TerminalApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2A000000000000000000000000000001 /* TerminalApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalApp.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000002 /* ANSIParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ANSIParser.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000003 /* ConfigurationWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationWindow.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000004 /* InlineTerminalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineTerminalView.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000005 /* KeyboardHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardHandler.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000006 /* LocalShell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalShell.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000007 /* MacOSTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacOSTextField.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000008 /* MoshClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoshClient.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000009 /* NativeTerminalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeTerminalView.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000010 /* SimpleShell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleShell.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000011 /* SplitPaneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitPaneView.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000012 /* SSHClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSHClient.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000013 /* TabbedTerminalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabbedTerminalView.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000014 /* TabManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabManager.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000015 /* TerminalInputHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalInputHandler.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000016 /* TerminalSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalSearchView.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000017 /* TerminalSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalSession.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000018 /* TerminalTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalTheme.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000019 /* TerminalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalView.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000020 /* TerminalWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalWindow.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000021 /* ThemeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeSettingsView.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000022 /* VTermWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VTermWrapper.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000024 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		563F7FE12E639B44004CDCAD /* SwiftSSHClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftSSHClient.swift; sourceTree = "<group>"; };
+		563F7FE32E647284004CDCAD /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		1A000000000000000000000000000100 /* TerminalAppXcode */ = {
+			isa = PBXGroup;
+			children = (
+				2A000000000000000000000000000001 /* TerminalApp.swift */,
+				1A000000000000000000000000000101 /* TerminalCore */,
+			);
+			path = TerminalAppXcode;
+			sourceTree = "<group>";
+		};
+		1A000000000000000000000000000101 /* TerminalCore */ = {
+			isa = PBXGroup;
+			children = (
+				563F7FE32E647284004CDCAD /* SettingsManager.swift */,
+				563F7FE12E639B44004CDCAD /* SwiftSSHClient.swift */,
+				2A000000000000000000000000000002 /* ANSIParser.swift */,
+				2A000000000000000000000000000003 /* ConfigurationWindow.swift */,
+				2A000000000000000000000000000004 /* InlineTerminalView.swift */,
+				2A000000000000000000000000000005 /* KeyboardHandler.swift */,
+				2A000000000000000000000000000006 /* LocalShell.swift */,
+				2A000000000000000000000000000007 /* MacOSTextField.swift */,
+				2A000000000000000000000000000008 /* MoshClient.swift */,
+				2A000000000000000000000000000009 /* NativeTerminalView.swift */,
+				2A000000000000000000000000000010 /* SimpleShell.swift */,
+				2A000000000000000000000000000011 /* SplitPaneView.swift */,
+				2A000000000000000000000000000012 /* SSHClient.swift */,
+				2A000000000000000000000000000013 /* TabbedTerminalView.swift */,
+				2A000000000000000000000000000014 /* TabManager.swift */,
+				2A000000000000000000000000000015 /* TerminalInputHandler.swift */,
+				2A000000000000000000000000000016 /* TerminalSearchView.swift */,
+				2A000000000000000000000000000017 /* TerminalSession.swift */,
+				2A000000000000000000000000000018 /* TerminalTheme.swift */,
+				2A000000000000000000000000000019 /* TerminalView.swift */,
+				2A000000000000000000000000000020 /* TerminalWindow.swift */,
+				2A000000000000000000000000000021 /* ThemeSettingsView.swift */,
+				2A000000000000000000000000000022 /* VTermWrapper.swift */,
+				2A000000000000000000000000000024 /* AppState.swift */,
+			);
+			path = TerminalCore;
+			sourceTree = "<group>";
+		};
+		1A000000000000000000000000000998 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1A000000000000000000000000000000 /* TerminalApp.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1A000000000000000000000000000999 = {
+			isa = PBXGroup;
+			children = (
+				1A000000000000000000000000000100 /* TerminalAppXcode */,
+				1A000000000000000000000000000998 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1A000000000000000000000000000997 /* TerminalApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1A000000000000000000000000000996 /* Build configuration list for PBXNativeTarget "TerminalApp" */;
+			buildPhases = (
+				1A000000000000000000000000000995 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TerminalApp;
+			productName = TerminalApp;
+			productReference = 1A000000000000000000000000000000 /* TerminalApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1A000000000000000000000000000994 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					1A000000000000000000000000000997 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = 1A000000000000000000000000000993 /* Build configuration list for PBXProject "TerminalApp" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 1A000000000000000000000000000999;
+			productRefGroup = 1A000000000000000000000000000998 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1A000000000000000000000000000997 /* TerminalApp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1A000000000000000000000000000995 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1A000000000000000000000000000001 /* TerminalApp.swift in Sources */,
+				1A000000000000000000000000000002 /* ANSIParser.swift in Sources */,
+				1A000000000000000000000000000003 /* ConfigurationWindow.swift in Sources */,
+				1A000000000000000000000000000004 /* InlineTerminalView.swift in Sources */,
+				1A000000000000000000000000000005 /* KeyboardHandler.swift in Sources */,
+				1A000000000000000000000000000006 /* LocalShell.swift in Sources */,
+				1A000000000000000000000000000007 /* MacOSTextField.swift in Sources */,
+				1A000000000000000000000000000008 /* MoshClient.swift in Sources */,
+				1A000000000000000000000000000009 /* NativeTerminalView.swift in Sources */,
+				563F7FE22E639B45004CDCAD /* SwiftSSHClient.swift in Sources */,
+				1A000000000000000000000000000010 /* SimpleShell.swift in Sources */,
+				1A000000000000000000000000000011 /* SplitPaneView.swift in Sources */,
+				1A000000000000000000000000000012 /* SSHClient.swift in Sources */,
+				1A000000000000000000000000000013 /* TabbedTerminalView.swift in Sources */,
+				1A000000000000000000000000000014 /* TabManager.swift in Sources */,
+				1A000000000000000000000000000015 /* TerminalInputHandler.swift in Sources */,
+				1A000000000000000000000000000016 /* TerminalSearchView.swift in Sources */,
+				1A000000000000000000000000000017 /* TerminalSession.swift in Sources */,
+				1A000000000000000000000000000018 /* TerminalTheme.swift in Sources */,
+				1A000000000000000000000000000019 /* TerminalView.swift in Sources */,
+				1A000000000000000000000000000020 /* TerminalWindow.swift in Sources */,
+				563F7FE42E647284004CDCAD /* SettingsManager.swift in Sources */,
+				1A000000000000000000000000000021 /* ThemeSettingsView.swift in Sources */,
+				1A000000000000000000000000000022 /* VTermWrapper.swift in Sources */,
+				1A000000000000000000000000000024 /* AppState.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1A000000000000000000000000000989 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2ER7ZD47W2;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Terminal App";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.max.terminalapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		1A000000000000000000000000000990 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2ER7ZD47W2;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Terminal App";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.max.terminalapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		1A000000000000000000000000000991 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		1A000000000000000000000000000992 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1A000000000000000000000000000993 /* Build configuration list for PBXProject "TerminalApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1A000000000000000000000000000991 /* Debug */,
+				1A000000000000000000000000000992 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1A000000000000000000000000000996 /* Build configuration list for PBXNativeTarget "TerminalApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1A000000000000000000000000000989 /* Debug */,
+				1A000000000000000000000000000990 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1A000000000000000000000000000994 /* Project object */;
+}

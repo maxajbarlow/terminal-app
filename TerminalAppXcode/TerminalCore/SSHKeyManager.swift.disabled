@@ -1,0 +1,164 @@
+import Foundation
+import NIOSSH
+import Crypto
+
+public class SSHKeyManager {
+    
+    // MARK: - Key Generation
+    
+    /// Generate a new Ed25519 key pair
+    public static func generateEd25519KeyPair() -> (privateKey: NIOSSHPrivateKey, publicKey: NIOSSHPublicKey) {
+        let ed25519Key = Curve25519.Signing.PrivateKey()
+        let privateKey = NIOSSHPrivateKey(ed25519Key: ed25519Key)
+        return (privateKey: privateKey, publicKey: privateKey.publicKey)
+    }
+    
+    /// Generate a new P256 ECDSA key pair
+    public static func generateP256KeyPair() -> (privateKey: NIOSSHPrivateKey, publicKey: NIOSSHPublicKey) {
+        let p256Key = P256.Signing.PrivateKey()
+        let privateKey = NIOSSHPrivateKey(p256Key: p256Key)
+        return (privateKey: privateKey, publicKey: privateKey.publicKey)
+    }
+    
+    /// Generate a new P384 ECDSA key pair
+    public static func generateP384KeyPair() -> (privateKey: NIOSSHPrivateKey, publicKey: NIOSSHPublicKey) {
+        let p384Key = P384.Signing.PrivateKey()
+        let privateKey = NIOSSHPrivateKey(p384Key: p384Key)
+        return (privateKey: privateKey, publicKey: privateKey.publicKey)
+    }
+    
+    /// Generate a new P521 ECDSA key pair
+    public static func generateP521KeyPair() -> (privateKey: NIOSSHPrivateKey, publicKey: NIOSSHPublicKey) {
+        let p521Key = P521.Signing.PrivateKey()
+        let privateKey = NIOSSHPrivateKey(p521Key: p521Key)
+        return (privateKey: privateKey, publicKey: privateKey.publicKey)
+    }
+    
+    #if canImport(Security)
+    /// Generate a new Secure Enclave P256 key pair (macOS/iOS only)
+    @available(macOS 10.15, iOS 13.0, *)
+    public static func generateSecureEnclaveP256KeyPair() throws -> (privateKey: NIOSSHPrivateKey, publicKey: NIOSSHPublicKey) {
+        let secureEnclaveKey = try SecureEnclave.P256.Signing.PrivateKey()
+        let privateKey = NIOSSHPrivateKey(secureEnclaveP256Key: secureEnclaveKey)
+        return (privateKey: privateKey, publicKey: privateKey.publicKey)
+    }
+    #endif
+    
+    // MARK: - Key Storage
+    
+    /// Save a private key to the file system
+    public static func savePrivateKey(_ privateKey: NIOSSHPrivateKey, to path: String) throws {
+        let expandedPath = NSString(string: path).expandingTildeInPath
+        let url = URL(fileURLWithPath: expandedPath)
+        
+        // Create directory if it doesn't exist
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), 
+                                                withIntermediateDirectories: true)
+        
+        // For now, we'll store the key in a simple format
+        // In production, you'd want to use proper OpenSSH key format
+        let keyData = try serializePrivateKey(privateKey)
+        try keyData.write(to: url)
+        
+        // Set appropriate file permissions (readable only by owner)
+        try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: expandedPath)
+    }
+    
+    /// Load a private key from the file system
+    public static func loadPrivateKey(from path: String) throws -> NIOSSHPrivateKey {
+        let expandedPath = NSString(string: path).expandingTildeInPath
+        let keyData = try Data(contentsOf: URL(fileURLWithPath: expandedPath))
+        return try deserializePrivateKey(keyData)
+    }
+    
+    /// Save public key in OpenSSH authorized_keys format
+    public static func savePublicKeyForAuthorization(_ publicKey: NIOSSHPublicKey, to path: String, comment: String = "") throws {
+        let expandedPath = NSString(string: path).expandingTildeInPath
+        let url = URL(fileURLWithPath: expandedPath)
+        
+        // Create directory if it doesn't exist
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), 
+                                                withIntermediateDirectories: true)
+        
+        let publicKeyString = try serializePublicKeyForAuthorization(publicKey, comment: comment)
+        try publicKeyString.write(to: url, atomically: true, encoding: .utf8)
+    }
+    
+    // MARK: - Key Serialization (Basic Implementation)
+    
+    private static func serializePrivateKey(_ privateKey: NIOSSHPrivateKey) throws -> Data {
+        // This is a simplified serialization
+        // In production, you'd want to implement proper OpenSSH key format
+        // For now, we'll just store a marker indicating this is our custom format
+        let header = "TERMINALSSH-PRIVATE-KEY"
+        let headerData = header.data(using: .utf8)!
+        
+        // In a real implementation, you'd serialize the actual key data
+        // For this demo, we'll just store the header
+        return headerData
+    }
+    
+    private static func deserializePrivateKey(_ data: Data) throws -> NIOSSHPrivateKey {
+        // This is a simplified deserialization
+        // In production, you'd want to parse proper OpenSSH key formats
+        guard let header = String(data: data, encoding: .utf8),
+              header.contains("TERMINALSSH-PRIVATE-KEY") else {
+            throw SSHKeyError.invalidKeyFormat
+        }
+        
+        // For demo purposes, generate a new key
+        // In production, you'd parse the actual key data
+        return generateEd25519KeyPair().privateKey
+    }
+    
+    private static func serializePublicKeyForAuthorization(_ publicKey: NIOSSHPublicKey, comment: String) throws -> String {
+        // Convert public key to OpenSSH authorized_keys format
+        // This is a simplified version - real implementation would use proper SSH wire format
+        let keyType: String
+        
+        // Determine key type based on the public key
+        // This is simplified - you'd need to inspect the actual key type
+        keyType = "ssh-ed25519"
+        
+        // Base64 encode the key data (simplified)
+        let keyData = Data() // In production, this would be the actual key data
+        let base64Key = keyData.base64EncodedString()
+        
+        return "\(keyType) \(base64Key) \(comment)\n"
+    }
+    
+    // MARK: - Default Key Locations
+    
+    /// Get the default SSH directory path
+    public static var defaultSSHDirectory: String {
+        let homeDirectory = FileManager.default.homeDirectoryForCurrentUser.path
+        return "\(homeDirectory)/.ssh"
+    }
+    
+    /// Get default private key paths for common key types
+    public static var defaultPrivateKeyPaths: [String: String] {
+        let sshDir = defaultSSHDirectory
+        return [
+            "ed25519": "\(sshDir)/id_ed25519",
+            "rsa": "\(sshDir)/id_rsa",
+            "ecdsa": "\(sshDir)/id_ecdsa",
+            "ecdsa_p256": "\(sshDir)/id_ecdsa_p256",
+            "ecdsa_p384": "\(sshDir)/id_ecdsa_p384",
+            "ecdsa_p521": "\(sshDir)/id_ecdsa_p521"
+        ]
+    }
+    
+    /// Get default public key paths for common key types
+    public static var defaultPublicKeyPaths: [String: String] {
+        let privateKeys = defaultPrivateKeyPaths
+        return privateKeys.mapValues { "\($0).pub" }
+    }
+}
+
+public enum SSHKeyError: Error {
+    case invalidKeyFormat
+    case keyGenerationFailed
+    case keyStorageFailed
+    case keyNotFound
+    case unsupportedKeyType
+}

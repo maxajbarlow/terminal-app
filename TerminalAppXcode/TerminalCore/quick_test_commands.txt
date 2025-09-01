@@ -1,0 +1,64 @@
+# QUICK COPY-PASTE TERMINAL TESTS
+# Run these commands in BOTH your Terminal App and macOS Terminal
+# Compare the results
+
+# ===== BASIC SHELL TESTS =====
+pwd
+ls -la
+cd ~
+pwd
+cd /tmp
+pwd
+cd
+echo "test content" > test_file.txt
+cat test_file.txt
+rm test_file.txt
+
+# ===== SSH KEY TESTS =====
+ssh-keygen -t ed25519 -C "test@example.com"
+cat ~/.ssh/id_ed25519.pub
+ssh-add -l
+ssh-add
+ssh -T git@github.com
+
+# ===== MOSH TESTS =====
+mosh
+mosh user@example.com
+
+# ===== FILE OPERATIONS =====
+mkdir test_directory
+ls
+touch test_directory/sample.txt
+echo "sample content" > test_directory/sample.txt
+cat test_directory/sample.txt
+ls -la test_directory/
+rm -rf test_directory
+
+# ===== SYSTEM INFO =====
+whoami
+uname -a
+echo $HOME
+echo $PATH
+df -h
+
+# ===== NETWORK TESTS =====
+ping -c 2 8.8.8.8
+curl -I https://github.com
+
+# ===== BUILT-IN COMMANDS =====
+help
+clear
+history
+
+# ===== ADVANCED FEATURES =====
+find . -name "*.swift" -type f | head -3
+ps aux | head -5
+du -sh ~/.ssh
+
+# Expected Results Summary:
+# ✅ Basic commands should work identically
+# ⚠️  SSH commands enhanced in Terminal App (no hanging, auto-agent)
+# ⚠️  Mosh support in Terminal App vs command not found in macOS Terminal
+# ✅ File operations identical
+# ✅ System commands identical  
+# ⚠️  help command works in Terminal App, not in macOS Terminal
