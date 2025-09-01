@@ -30,6 +30,7 @@
 		1A000000000000000000000000000021 /* ThemeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000021 /* ThemeSettingsView.swift */; };
 		1A000000000000000000000000000022 /* VTermWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000022 /* VTermWrapper.swift */; };
 		1A000000000000000000000000000024 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000024 /* AppState.swift */; };
+		1A000000000000000000000000000025 /* MultithreadedTerminalProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A000000000000000000000000000025 /* MultithreadedTerminalProcessor.swift */; };
 		563F7FE22E639B45004CDCAD /* SwiftSSHClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 563F7FE12E639B44004CDCAD /* SwiftSSHClient.swift */; };
 		563F7FE42E647284004CDCAD /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 563F7FE32E647284004CDCAD /* SettingsManager.swift */; };
 /* End PBXBuildFile section */
@@ -59,6 +60,7 @@
 		2A000000000000000000000000000021 /* ThemeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeSettingsView.swift; sourceTree = "<group>"; };
 		2A000000000000000000000000000022 /* VTermWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VTermWrapper.swift; sourceTree = "<group>"; };
 		2A000000000000000000000000000024 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		2A000000000000000000000000000025 /* MultithreadedTerminalProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultithreadedTerminalProcessor.swift; sourceTree = "<group>"; };
 		563F7FE12E639B44004CDCAD /* SwiftSSHClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftSSHClient.swift; sourceTree = "<group>"; };
 		563F7FE32E647284004CDCAD /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -100,6 +102,7 @@
 				2A000000000000000000000000000021 /* ThemeSettingsView.swift */,
 				2A000000000000000000000000000022 /* VTermWrapper.swift */,
 				2A000000000000000000000000000024 /* AppState.swift */,
+				2A000000000000000000000000000025 /* MultithreadedTerminalProcessor.swift */,
 			);
 			path = TerminalCore;
 			sourceTree = "<group>";
@@ -201,6 +204,7 @@
 				1A000000000000000000000000000021 /* ThemeSettingsView.swift in Sources */,
 				1A000000000000000000000000000022 /* VTermWrapper.swift in Sources */,
 				1A000000000000000000000000000024 /* AppState.swift in Sources */,
+				1A000000000000000000000000000025 /* MultithreadedTerminalProcessor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
