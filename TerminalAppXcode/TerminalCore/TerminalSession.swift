@@ -11,6 +11,11 @@ public class TerminalSession: ObservableObject, @unchecked Sendable {
     public var onConfigurationRequested: (() -> Void)?
     public var historyManager: CommandHistoryManager?
     
+    // Multithreaded output processing
+    private var outputProcessor = MultithreadedTerminalProcessor()
+    @Published public var isProcessingOutput: Bool = false
+    @Published public var processingStats: MultithreadedTerminalProcessor.ProcessingStats = MultithreadedTerminalProcessor.ProcessingStats()
+    
     // Connection handling
     private var connectionInfo: ConnectionInfo?
     private var simpleShell: SimpleShell?
@@ -21,13 +26,28 @@ public class TerminalSession: ObservableObject, @unchecked Sendable {
     
     public init() {
         self._sessionId = UUID().uuidString
+        setupOutputProcessorBindings()
         startSimpleShell()
     }
     
     public init(connectionInfo: ConnectionInfo) {
         self._sessionId = UUID().uuidString
         self.connectionInfo = connectionInfo
+        setupOutputProcessorBindings()
         startConnection()
+    }
+    
+    private func setupOutputProcessorBindings() {
+        // Bind output processor state to published properties
+        outputProcessor.$isProcessing
+            .assign(to: &$isProcessingOutput)
+        
+        outputProcessor.$processingStats
+            .assign(to: &$processingStats)
+        
+        outputProcessor.$processedOutput
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$output)
     }
     
     private func startSimpleShell() {
@@ -47,10 +67,14 @@ Type 'help' for available commands or use any standard shell command.
 """
         simpleShell = SimpleShell()
         simpleShell?.onOutput = { [weak self] newOutput in
-            DispatchQueue.main.async {
-                self?.output += newOutput
-            }
+            // Process output using multithreaded processor
+            self?.outputProcessor.processOutput(newOutput)
             self?.onLiveOutput?(newOutput)
+        }
+        simpleShell?.onLargeOutput = { [weak self] largeOutput in
+            // Process large output chunks using optimized multithreaded processing
+            self?.outputProcessor.processLargeOutput(largeOutput)
+            self?.onLiveOutput?(largeOutput)
         }
         simpleShell?.onDirectoryChange = { [weak self] newPath in
             DispatchQueue.main.async {
@@ -177,11 +201,10 @@ Connecting to \(connectionInfo.username)@\(connectionInfo.host):\(connectionInfo
                 sshClient = try SSHClient(host: connectionInfo.host, port: connectionInfo.port, username: connectionInfo.username)
                 
                 sshClient?.onDataReceived = { [weak self] data in
-                    DispatchQueue.main.async {
-                        if let output = String(data: data, encoding: .utf8) {
-                            self?.output += output
-                            self?.onLiveOutput?(output)
-                        }
+                    if let output = String(data: data, encoding: .utf8) {
+                        // Process output using multithreaded processor
+                        self?.outputProcessor.processOutput(output)
+                        self?.onLiveOutput?(output)
                     }
                 }
                 
@@ -243,7 +266,7 @@ Connecting to \(connectionInfo.username)@\(connectionInfo.host):\(connectionInfo
     
     public func executeCommand(_ command: String) {
         if command == "clear" {
-            output = ""
+            outputProcessor.clearOutput()
             // Don't record "clear" commands in history as they don't have meaningful output
         } else {
             sendInput(command)
@@ -274,6 +297,18 @@ Connecting to \(connectionInfo.username)@\(connectionInfo.host):\(connectionInfo
     
     public func setAppCommandHandler(_ handler: @escaping (String, [String]) -> Bool) {
         simpleShell?.onAppCommand = handler
+    }
+    
+    // MARK: - Multithreaded Processing Interface
+    
+    /// Get current output processing performance statistics
+    public var outputProcessingStats: MultithreadedTerminalProcessor.ProcessingStats {
+        return outputProcessor.processingStats
+    }
+    
+    /// Check if terminal is currently processing output in background
+    public var isOutputProcessing: Bool {
+        return outputProcessor.isProcessing
     }
 }
 

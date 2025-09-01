@@ -30,6 +30,7 @@ func withTimeout<T>(seconds: TimeInterval, operation: @escaping () async throws 
 
 public class SimpleShell: ObservableObject {
     public var onOutput: ((String) -> Void)?
+    public var onLargeOutput: ((String) -> Void)? // For large output chunks
     public var onDirectoryChange: ((String) -> Void)?
     public var onCommandCompleted: (() -> Void)?
     public var onAppCommand: ((String, [String]) -> Bool)?
@@ -41,6 +42,11 @@ public class SimpleShell: ObservableObject {
     private var currentTask: Process?
     #endif
     
+    // Buffer for accumulating output
+    private var outputBuffer = ""
+    private let outputBufferLock = NSLock()
+    private let bufferFlushThreshold = 4096 // 4KB threshold
+    
     public init() {
         #if canImport(AppKit)
         currentWorkingDirectory = FileManager.default.currentDirectoryPath
@@ -48,6 +54,40 @@ public class SimpleShell: ObservableObject {
         // On iOS, use the app's documents directory as the default
         currentWorkingDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first ?? "/tmp"
         #endif
+    }
+    
+    // MARK: - Output Buffer Management
+    
+    private func addToOutputBuffer(_ output: String) {
+        outputBufferLock.lock()
+        defer { outputBufferLock.unlock() }
+        
+        outputBuffer += output
+        
+        // Flush buffer if it exceeds threshold
+        if outputBuffer.utf8.count >= bufferFlushThreshold {
+            flushOutputBuffer()
+        }
+    }
+    
+    private func flushOutputBuffer() {
+        guard !outputBuffer.isEmpty else { return }
+        
+        let bufferedOutput = outputBuffer
+        outputBuffer = ""
+        
+        // Use large output handler if available, otherwise fall back to regular output
+        if let onLargeOutput = onLargeOutput {
+            onLargeOutput(bufferedOutput)
+        } else {
+            onOutput?(bufferedOutput)
+        }
+    }
+    
+    private func finalizeOutput() {
+        outputBufferLock.lock()
+        defer { outputBufferLock.unlock() }
+        flushOutputBuffer()
     }
     
     public func executeCommand(_ command: String) {
@@ -181,29 +221,26 @@ public class SimpleShell: ObservableObject {
             let outputHandle = outputPipe.fileHandleForReading
             let errorHandle = errorPipe.fileHandleForReading
             
-            // Set up notification for output data availability
+            // Set up notification for output data availability with buffering
             outputHandle.readabilityHandler = { [weak self] handle in
                 let data = handle.availableData
                 if !data.isEmpty {
                     if let output = String(data: data, encoding: .utf8) {
-                        DispatchQueue.main.async {
-                            self?.onOutput?(output)
-                        }
+                        self?.addToOutputBuffer(output)
                     }
                 } else {
-                    // End of file
+                    // End of file - flush remaining buffer
+                    self?.finalizeOutput()
                     handle.readabilityHandler = nil
                 }
             }
             
-            // Set up notification for error data availability
+            // Set up notification for error data availability with buffering
             errorHandle.readabilityHandler = { [weak self] handle in
                 let data = handle.availableData
                 if !data.isEmpty {
                     if let output = String(data: data, encoding: .utf8) {
-                        DispatchQueue.main.async {
-                            self?.onOutput?(output)
-                        }
+                        self?.addToOutputBuffer(output)
                     }
                 } else {
                     // End of file
