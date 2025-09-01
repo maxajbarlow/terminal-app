@@ -81,6 +81,12 @@ public class MultithreadedTerminalProcessor: ObservableObject, @unchecked Sendab
         let chunks = rawOutput.chunked(into: bufferSize)
         let totalChunks = chunks.count
         
+        guard totalChunks > 0 else { 
+            // Fallback to regular processing
+            processOutput(rawOutput)
+            return 
+        }
+        
         updateProcessingState(true)
         
         // Process chunks concurrently with limited concurrency
@@ -122,6 +128,12 @@ public class MultithreadedTerminalProcessor: ObservableObject, @unchecked Sendab
     // MARK: - Background Processing
     
     private func performBackgroundProcessing(_ rawOutput: String) {
+        guard !rawOutput.isEmpty else {
+            processingOperations.decrement()
+            updateProcessingState(false)
+            return
+        }
+        
         let startTime = CFAbsoluteTimeGetCurrent()
         
         // Phase 1: ANSI sequence processing on dedicated thread
@@ -191,12 +203,19 @@ public class MultithreadedTerminalProcessor: ObservableObject, @unchecked Sendab
     // MARK: - ANSI Sequence Processing
     
     private func processAnsiSequences(_ input: String) -> String {
+        guard !input.isEmpty else { return input }
+        
         // Strip ANSI color codes and control sequences for cleaner output
         var result = input
         
-        // Remove ANSI escape sequences
-        let ansiPattern = #/\x1B\[[0-9;]*[mK]/#
-        result = result.replacing(ansiPattern, with: "")
+        do {
+            // Remove ANSI escape sequences
+            let ansiPattern = #/\x1B\[[0-9;]*[mK]/#
+            result = result.replacing(ansiPattern, with: "")
+        } catch {
+            // If regex fails, continue without ANSI processing
+            print("ANSI processing error: \(error)")
+        }
         
         // Remove carriage returns that would overwrite content
         result = result.replacingOccurrences(of: "\r\n", with: "\n")
@@ -359,10 +378,19 @@ private class ThreadSafeCounter {
 
 private extension String {
     func chunked(into size: Int) -> [String] {
-        return stride(from: 0, to: count, by: size).map { i in
-            let startIndex = index(startIndex, offsetBy: i)
-            let endIndex = index(startIndex, offsetBy: min(size, count - i))
-            return String(self[startIndex..<endIndex])
+        guard !isEmpty else { return [] }
+        guard size > 0 else { return [self] }
+        
+        var chunks: [String] = []
+        var startIndex = self.startIndex
+        
+        while startIndex < self.endIndex {
+            let endIndex = self.index(startIndex, offsetBy: size, limitedBy: self.endIndex) ?? self.endIndex
+            let chunk = String(self[startIndex..<endIndex])
+            chunks.append(chunk)
+            startIndex = endIndex
         }
+        
+        return chunks
     }
 }
