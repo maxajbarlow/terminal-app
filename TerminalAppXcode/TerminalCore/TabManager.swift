@@ -125,19 +125,21 @@ public class CommandHistoryManager: ObservableObject {
 
 public struct TerminalTab: Identifiable, Equatable {
     public let id = UUID()
-    public let title: String
+    public var title: String  // Make title mutable for dynamic updates
     public let session: TerminalSession?
     public let isMultiplexer: Bool
     
     public init(title: String) {
         self.title = title
-        self.session = TerminalSession()
+        let newSession = TerminalSession()
+        self.session = newSession
         self.isMultiplexer = false
     }
     
     public init(title: String, connectionInfo: ConnectionInfo) {
         self.title = title
-        self.session = TerminalSession(connectionInfo: connectionInfo)
+        let newSession = TerminalSession(connectionInfo: connectionInfo)
+        self.session = newSession
         self.isMultiplexer = false
     }
     
@@ -243,7 +245,8 @@ public class TabManager: ObservableObject {
     }
     
     public func updateTabTitle(_ title: String, for id: UUID) {
-        // Note: Since TerminalTab.title is let, we'd need to recreate the tab
-        // For now, we'll keep the original title system simple
+        if let index = tabs.firstIndex(where: { $0.id == id }) {
+            tabs[index].title = title
+        }
     }
 }

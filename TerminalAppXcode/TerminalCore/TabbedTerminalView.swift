@@ -110,11 +110,15 @@ public struct TabbedTerminalView: View {
                         // Show multiplexer interface
                         Text("Multiplexer View")
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } else {
-                        // Show regular terminal interface
-                        SplitPaneView()
+                    } else if let session = selectedTab.session {
+                        // Show regular terminal interface with the selected session
+                        TerminalView(session: session)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .environmentObject(historyManager)
+                    } else {
+                        Text("No session available")
+                            .foregroundColor(.secondary)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                 } else {
                     Text("No terminal session")
@@ -197,6 +201,15 @@ public struct TabbedTerminalView: View {
                     case "w":
                         if !event.modifierFlags.contains(.shift) {
                             self.tabManager?.closeSelectedTab()
+                            return nil
+                        }
+                    case "1", "2", "3", "4", "5", "6", "7", "8", "9":
+                        // Switch to tab by number
+                        if let tabNumber = Int(event.charactersIgnoringModifiers ?? ""),
+                           let manager = self.tabManager,
+                           tabNumber > 0 && tabNumber <= manager.tabs.count {
+                            let targetTab = manager.tabs[tabNumber - 1]
+                            manager.selectTab(withId: targetTab.id)
                             return nil
                         }
                     default:
