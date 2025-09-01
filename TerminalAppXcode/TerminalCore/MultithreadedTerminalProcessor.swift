@@ -62,6 +62,25 @@ public class MultithreadedTerminalProcessor: ObservableObject, @unchecked Sendab
         }
     }
     
+    /// Process output with minimal delay for live commands (ping, tail, etc.)
+    public func processLiveOutput(_ rawOutput: String) {
+        guard !rawOutput.isEmpty else { return }
+        
+        // For live output, do minimal processing and update immediately
+        let processedOutput = processAnsiSequences(rawOutput)
+        outputBuffer.append(processedOutput)
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.processedOutput = self.outputBuffer.getBufferedOutput()
+            self.updateStats(
+                bytesProcessed: Int64(rawOutput.utf8.count),
+                linesProcessed: rawOutput.components(separatedBy: .newlines).count,
+                processingTime: 0.1 // Minimal processing time for live output
+            )
+        }
+    }
+    
     /// Process large output chunks efficiently  
     public func processLargeOutput(_ rawOutput: String) {
         guard !rawOutput.isEmpty else { return }
@@ -122,26 +141,26 @@ public class MultithreadedTerminalProcessor: ObservableObject, @unchecked Sendab
         
         let startTime = CFAbsoluteTimeGetCurrent()
         
-        // Simplified single-threaded background processing
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+        // Fast processing for live output - minimal background work
+        DispatchQueue.global(qos: .userInteractive).async { [weak self] in
             guard let self = self, !self.isShuttingDown else {
                 self?.processingOperations.decrement()
                 return
             }
             
-            // Process ANSI sequences
+            // Quick ANSI processing
             let processedAnsi = self.processAnsiSequences(rawOutput)
             
-            // Update buffer
+            // Update buffer and get output immediately
             self.outputBuffer.append(processedAnsi)
-            let finalOutput = self.outputBuffer.getBufferedOutput()
+            let currentOutput = self.outputBuffer.getBufferedOutput()
             
             // Calculate processing time
             let processingTime = (CFAbsoluteTimeGetCurrent() - startTime) * 1000 // ms
             
-            // Update UI on main thread
+            // Update UI immediately for live output
             DispatchQueue.main.async {
-                self.processedOutput = finalOutput
+                self.processedOutput = currentOutput
                 self.updateStats(
                     bytesProcessed: Int64(rawOutput.utf8.count),
                     linesProcessed: rawOutput.components(separatedBy: .newlines).count,
@@ -184,24 +203,29 @@ public class MultithreadedTerminalProcessor: ObservableObject, @unchecked Sendab
     private func processAnsiSequences(_ input: String) -> String {
         guard !input.isEmpty else { return input }
         
-        // Strip ANSI color codes and control sequences for cleaner output
+        // For live output, do minimal processing for speed
         var result = input
         
-        do {
-            // Remove ANSI escape sequences
-            let ansiPattern = #/\x1B\[[0-9;]*[mK]/#
-            result = result.replacing(ansiPattern, with: "")
-        } catch {
-            // If regex fails, continue without ANSI processing
-            print("ANSI processing error: \(error)")
+        // Quick ANSI cleanup - only handle most common cases for performance
+        if result.contains("\u{001B}[") {
+            do {
+                // Remove common ANSI escape sequences
+                let ansiPattern = #/\x1B\[[0-9;]*[mK]/#
+                result = result.replacing(ansiPattern, with: "")
+            } catch {
+                // If regex fails, continue without ANSI processing
+                // Don't print error for live output to avoid spam
+            }
         }
         
-        // Remove carriage returns that would overwrite content
-        result = result.replacingOccurrences(of: "\r\n", with: "\n")
-        result = result.replacingOccurrences(of: "\r", with: "\n")
+        // Quick carriage return cleanup
+        if result.contains("\r") {
+            result = result.replacingOccurrences(of: "\r\n", with: "\n")
+            result = result.replacingOccurrences(of: "\r", with: "\n")
+        }
         
-        // Handle backspace sequences
-        result = processBackspaces(result)
+        // Skip backspace processing for live output (too slow)
+        // Live commands like ping don't typically use backspaces
         
         return result
     }

@@ -67,8 +67,8 @@ Type 'help' for available commands or use any standard shell command.
 """
         simpleShell = SimpleShell()
         simpleShell?.onOutput = { [weak self] newOutput in
-            // Process output using multithreaded processor
-            self?.outputProcessor.processOutput(newOutput)
+            // Process output using live processing for immediate feedback
+            self?.outputProcessor.processLiveOutput(newOutput)
             self?.onLiveOutput?(newOutput)
         }
         simpleShell?.onLargeOutput = { [weak self] largeOutput in
@@ -202,8 +202,8 @@ Connecting to \(connectionInfo.username)@\(connectionInfo.host):\(connectionInfo
                 
                 sshClient?.onDataReceived = { [weak self] data in
                     if let output = String(data: data, encoding: .utf8) {
-                        // Process output using multithreaded processor
-                        self?.outputProcessor.processOutput(output)
+                        // Process output using live processing for real-time SSH output
+                        self?.outputProcessor.processLiveOutput(output)
                         self?.onLiveOutput?(output)
                     }
                 }
