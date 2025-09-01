@@ -22,18 +22,6 @@ public class MultithreadedTerminalProcessor: ObservableObject, @unchecked Sendab
         attributes: .concurrent
     )
     
-    private let ansiProcessingQueue = DispatchQueue(
-        label: "terminal.ansi.processing", 
-        qos: .userInitiated
-    )
-    
-    private let bufferQueue = DispatchQueue(
-        label: "terminal.buffer.management",
-        qos: .utility
-    )
-    
-    private let mainThreadUpdateQueue = DispatchQueue.main
-    
     // MARK: - Thread-Safe Data Structures
     private let outputBuffer = ThreadSafeBuffer<String>()
     private let processingOperations = ThreadSafeCounter()
@@ -107,7 +95,7 @@ public class MultithreadedTerminalProcessor: ObservableObject, @unchecked Sendab
         }
         
         // Update UI when all chunks are processed
-        group.notify(queue: mainThreadUpdateQueue) { [weak self] in
+        group.notify(queue: DispatchQueue.main) { [weak self] in
             self?.finalizeOutput()
             self?.updateProcessingState(false)
         }
@@ -115,13 +103,11 @@ public class MultithreadedTerminalProcessor: ObservableObject, @unchecked Sendab
     
     /// Clear output and reset state
     public func clearOutput() {
-        bufferQueue.async { [weak self] in
-            self?.outputBuffer.clear()
-            
-            DispatchQueue.main.async {
-                self?.processedOutput = ""
-                self?.processingStats = ProcessingStats()
-            }
+        outputBuffer.clear()
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.processedOutput = ""
+            self?.processingStats = ProcessingStats()
         }
     }
     
@@ -136,40 +122,35 @@ public class MultithreadedTerminalProcessor: ObservableObject, @unchecked Sendab
         
         let startTime = CFAbsoluteTimeGetCurrent()
         
-        // Phase 1: ANSI sequence processing on dedicated thread
-        ansiProcessingQueue.async { [weak self] in
+        // Simplified single-threaded background processing
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self, !self.isShuttingDown else {
                 self?.processingOperations.decrement()
                 return
             }
             
+            // Process ANSI sequences
             let processedAnsi = self.processAnsiSequences(rawOutput)
             
-            // Phase 2: Buffer management and deduplication
-            self.bufferQueue.async {
-                guard !self.isShuttingDown else {
-                    self.processingOperations.decrement()
-                    return
-                }
+            // Update buffer
+            self.outputBuffer.append(processedAnsi)
+            let finalOutput = self.outputBuffer.getBufferedOutput()
+            
+            // Calculate processing time
+            let processingTime = (CFAbsoluteTimeGetCurrent() - startTime) * 1000 // ms
+            
+            // Update UI on main thread
+            DispatchQueue.main.async {
+                self.processedOutput = finalOutput
+                self.updateStats(
+                    bytesProcessed: Int64(rawOutput.utf8.count),
+                    linesProcessed: rawOutput.components(separatedBy: .newlines).count,
+                    processingTime: processingTime
+                )
+                self.processingOperations.decrement()
                 
-                self.outputBuffer.append(processedAnsi)
-                let finalOutput = self.outputBuffer.getBufferedOutput()
-                
-                // Phase 3: UI update on main thread
-                let processingTime = (CFAbsoluteTimeGetCurrent() - startTime) * 1000 // ms
-                
-                self.mainThreadUpdateQueue.async {
-                    self.processedOutput = finalOutput
-                    self.updateStats(
-                        bytesProcessed: Int64(rawOutput.utf8.count),
-                        linesProcessed: rawOutput.components(separatedBy: .newlines).count,
-                        processingTime: processingTime
-                    )
-                    self.processingOperations.decrement()
-                    
-                    if self.processingOperations.value == 0 {
-                        self.updateProcessingState(false)
-                    }
+                if self.processingOperations.value == 0 {
+                    self.updateProcessingState(false)
                 }
             }
         }
@@ -182,21 +163,19 @@ public class MultithreadedTerminalProcessor: ObservableObject, @unchecked Sendab
         let processedChunk = processAnsiSequences(chunk)
         
         // Add to buffer with ordering
-        bufferQueue.async { [weak self] in
-            guard let self = self, !self.isShuttingDown else { return }
-            
-            self.outputBuffer.appendWithOrder(processedChunk, order: index)
-            
-            // Update stats
-            let processingTime = (CFAbsoluteTimeGetCurrent() - startTime) * 1000
-            
-            self.mainThreadUpdateQueue.async {
-                self.updateStats(
-                    bytesProcessed: Int64(chunk.utf8.count),
-                    linesProcessed: chunk.components(separatedBy: .newlines).count,
-                    processingTime: processingTime
-                )
-            }
+        guard !isShuttingDown else { return }
+        
+        outputBuffer.appendWithOrder(processedChunk, order: index)
+        
+        // Update stats on main thread
+        let processingTime = (CFAbsoluteTimeGetCurrent() - startTime) * 1000
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.updateStats(
+                bytesProcessed: Int64(chunk.utf8.count),
+                linesProcessed: chunk.components(separatedBy: .newlines).count,
+                processingTime: processingTime
+            )
         }
     }
     
@@ -257,7 +236,7 @@ public class MultithreadedTerminalProcessor: ObservableObject, @unchecked Sendab
     private func finalizeOutput() {
         let finalOutput = outputBuffer.getBufferedOutput()
         
-        mainThreadUpdateQueue.async { [weak self] in
+        DispatchQueue.main.async { [weak self] in
             self?.processedOutput = finalOutput
         }
     }
@@ -265,7 +244,7 @@ public class MultithreadedTerminalProcessor: ObservableObject, @unchecked Sendab
     // MARK: - Statistics and State Management
     
     private func updateProcessingState(_ processing: Bool) {
-        mainThreadUpdateQueue.async { [weak self] in
+        DispatchQueue.main.async { [weak self] in
             self?.isProcessing = processing
         }
     }
@@ -287,10 +266,8 @@ public class MultithreadedTerminalProcessor: ObservableObject, @unchecked Sendab
     }
     
     private func setupProcessingPipeline() {
-        // Configure queue priorities and QoS
-        outputProcessingQueue.setTarget(queue: DispatchQueue.global(qos: .userInitiated))
-        ansiProcessingQueue.setTarget(queue: DispatchQueue.global(qos: .userInitiated))
-        bufferQueue.setTarget(queue: DispatchQueue.global(qos: .utility))
+        // Queue setup completed during initialization
+        // The queues are properly configured with QoS levels in their creation
     }
     
     // MARK: - Cleanup
@@ -300,10 +277,8 @@ public class MultithreadedTerminalProcessor: ObservableObject, @unchecked Sendab
         isShuttingDown = true
         shutdownLock.unlock()
         
-        // Cancel any pending operations
-        outputProcessingQueue.suspend()
-        ansiProcessingQueue.suspend()
-        bufferQueue.suspend()
+        // Note: Queues will be automatically deallocated
+        // Suspending queues in deinit can cause crashes
     }
 }
 
