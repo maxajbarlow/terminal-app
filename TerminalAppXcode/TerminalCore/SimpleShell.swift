@@ -46,6 +46,7 @@ public class SimpleShell: ObservableObject {
     private var outputBuffer = ""
     private let outputBufferLock = NSLock()
     private let bufferFlushThreshold = 4096 // 4KB threshold
+    private var currentCommandIsLive = false // Track if current command needs live output
     
     public init() {
         #if canImport(AppKit)
@@ -64,8 +65,8 @@ public class SimpleShell: ObservableObject {
         
         outputBuffer += output
         
-        // Flush buffer if it exceeds threshold
-        if outputBuffer.utf8.count >= bufferFlushThreshold {
+        // Flush buffer if it exceeds threshold OR if it contains newlines (for live output)
+        if outputBuffer.utf8.count >= bufferFlushThreshold || output.contains("\n") {
             flushOutputBuffer()
         }
     }
@@ -84,6 +85,33 @@ public class SimpleShell: ObservableObject {
         }
     }
     
+    private func sendImmediateOutput(_ output: String) {
+        // Send output immediately without buffering for live commands
+        onOutput?(output)
+    }
+    
+    private func isLiveCommand(_ command: String) -> Bool {
+        let trimmed = command.trimmingCharacters(in: .whitespaces).lowercased()
+        
+        // Commands that typically produce continuous output
+        let liveCommands = ["ping", "tail", "watch", "top", "htop", "iostat", "vmstat", "netstat", "tcpdump"]
+        
+        for liveCommand in liveCommands {
+            if trimmed.hasPrefix(liveCommand + " ") || trimmed == liveCommand {
+                return true
+            }
+        }
+        
+        // Check for specific patterns
+        if trimmed.contains("tail -f") || 
+           trimmed.contains("ping") && !trimmed.contains("-c 1") ||
+           trimmed.contains("watch ") {
+            return true
+        }
+        
+        return false
+    }
+    
     private func finalizeOutput() {
         outputBufferLock.lock()
         defer { outputBufferLock.unlock() }
@@ -92,6 +120,9 @@ public class SimpleShell: ObservableObject {
     
     public func executeCommand(_ command: String) {
         let trimmedCommand = command.trimmingCharacters(in: .whitespaces)
+        
+        // Detect if this is a live command that needs immediate output
+        currentCommandIsLive = isLiveCommand(trimmedCommand)
         
         // Skip empty commands
         if trimmedCommand.isEmpty {
@@ -179,11 +210,11 @@ public class SimpleShell: ObservableObject {
         #if canImport(AppKit)
         // macOS: Execute commands using Process
         
-        // Modify potentially infinite commands to be finite
+        // For non-live commands, modify potentially infinite commands to be finite
         var modifiedCommand = command
         let trimmed = command.trimmingCharacters(in: .whitespaces)
-        if trimmed.hasPrefix("ping ") && !trimmed.contains("-c") && !trimmed.contains(" -") {
-            // Only auto-limit simple ping commands without any flags
+        if !currentCommandIsLive && trimmed.hasPrefix("ping ") && !trimmed.contains("-c") && !trimmed.contains(" -") {
+            // Only auto-limit simple ping commands without any flags when not live
             modifiedCommand = command + " -c 4"  // Limit ping to 4 packets
             onOutput?("[Modified command to limit output: \(modifiedCommand)]\n")
         }
@@ -221,26 +252,39 @@ public class SimpleShell: ObservableObject {
             let outputHandle = outputPipe.fileHandleForReading
             let errorHandle = errorPipe.fileHandleForReading
             
-            // Set up notification for output data availability with buffering
+            // Set up notification for output data availability
             outputHandle.readabilityHandler = { [weak self] handle in
                 let data = handle.availableData
                 if !data.isEmpty {
                     if let output = String(data: data, encoding: .utf8) {
-                        self?.addToOutputBuffer(output)
+                        if self?.currentCommandIsLive == true {
+                            // For live commands, send output immediately
+                            self?.sendImmediateOutput(output)
+                        } else {
+                            // For regular commands, use buffering
+                            self?.addToOutputBuffer(output)
+                        }
                     }
                 } else {
-                    // End of file - flush remaining buffer
+                    // End of file - flush remaining buffer and reset live flag
                     self?.finalizeOutput()
+                    self?.currentCommandIsLive = false
                     handle.readabilityHandler = nil
                 }
             }
             
-            // Set up notification for error data availability with buffering
+            // Set up notification for error data availability
             errorHandle.readabilityHandler = { [weak self] handle in
                 let data = handle.availableData
                 if !data.isEmpty {
                     if let output = String(data: data, encoding: .utf8) {
-                        self?.addToOutputBuffer(output)
+                        if self?.currentCommandIsLive == true {
+                            // For live commands, send error output immediately
+                            self?.sendImmediateOutput(output)
+                        } else {
+                            // For regular commands, use buffering
+                            self?.addToOutputBuffer(output)
+                        }
                     }
                 } else {
                     // End of file
